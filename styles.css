@@ -1,0 +1,114 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+.container {
+    text-align: center;
+    background-color: white;
+    padding: 20px;
+    border: 2px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h2 {
+    margin: 0 0 10px;
+}
+
+input {
+    width: 40px;
+    text-align: center;
+}
+
+button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Grid container */
+#gridContainer {
+    margin-top: 20px;
+    display: grid;
+    gap: 2px;
+}
+
+.grid-cell {
+    width: 30px;
+    height: 30px;
+    background-color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #ccc;
+}
+
+/* Hamburger menu style */
+.hamburger {
+    font-size: 30px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    color: #007BFF;
+}
+
+/* Position the hamburger menu in the upper left corner */
+/* Remove the fixed position for the hamburger menu */
+#dropdownContainer {
+    position: absolute;
+    display: none; /* Hide by default */
+}
+
+.hamburger {
+    font-size: 16px; /* Smaller size for the hamburger menu text */
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #007BFF;
+    padding: 5px;
+}
+
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 30px; /* Dropdown below the hamburger */
+    left: 0;
+    background-color: #f9f9f9;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    z-index: 1;
+    min-width: 120px;
+    padding: 5px 0;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: block;
+    font-size: 10px; /* Smaller size for the dropdown menu text */
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.show {
+    display: block;
+}

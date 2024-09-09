@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div id="controls">
+            <h2>Select Grid Size (5 to 10):</h2>
+            <input type="number" id="gridSizeInput" min="5" max="10" value="8">
+            <br>
+            <button id="startGame">Start Game</button>
+            <button id="loadGame">Load Game</button>
+        </div>
+
+        <div id="gridContainer"></div> <!-- Grid will be displayed here -->
+
+        <div id="dropdownContainer">
+            <!-- Hamburger menu icon -->
+            <button id="hamburgerMenu" class="hamburger">&#9776;</button>
+
+            <!-- Dropdown content -->
+            <div id="dropdown" class="dropdown-content">
+                <a href="#" id="endGame">End Game</a>
+                <a href="#" id="saveGame">Save Game</a>
+                <a href="#" id="loadGameDropdown">Load Game</a>
+                <a href="#" id="restartGame">Restart Game</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
