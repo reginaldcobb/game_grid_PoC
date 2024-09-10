@@ -18,6 +18,7 @@ const POWERUP_MOVE_FLASH_COUNT = 6;
 
 let score = 0;
 let currentRow, currentCol; // Variables to store the current position of the player
+let previousCell = null; // Store the previous active cell
 
 // Initialize moves left
 let horzMovesLeft = INITIAL_HORIZONTAL_MOVES;
@@ -33,6 +34,7 @@ document.getElementById('startGame').addEventListener('click', function() {
         hideControls();
         showScore(); // Show the score when the game starts
         updateMovesLeft();
+        showMoves(); // Show moves container when the game starts
         positionHamburgerMenu(); // Position the hamburger menu after starting the game
         resetScore(); // Reset the score when starting a new game
     } else {
@@ -71,6 +73,9 @@ document.getElementById('hamburgerMenu').addEventListener('mouseleave', function
     }, 300);
 });
 
+//
+//////////////////////////////////////////////////////////////////////
+//
 
 function drawGrid(gridSize) {
     const gridContainer = document.getElementById('gridContainer');
@@ -95,6 +100,11 @@ function drawGrid(gridSize) {
         }
     }
 
+    console.log(grid)
+
+    place_obstacles(gridSize, grid);
+
+
     // Select a random starting cell
     currentRow = Math.floor(Math.random() * gridSize);
     currentCol = Math.floor(Math.random() * gridSize);
@@ -106,22 +116,43 @@ function drawGrid(gridSize) {
         cell.classList.add('grid-cell');
         const row = Math.floor(i / gridSize);
         const col = i % gridSize;
-        cell.textContent = grid[row][col];
+        if (grid[row][col] === -1) {
+            cell.textContent = 'X'; // Display obstacles as 'X'
+            cell.style.backgroundColor = 'red'; // Highlight starting or current point
 
-        // If the cell is the starting point, highlight it in blue
+        } else {
+            cell.textContent = grid[row][col];
+            cell.style.backgroundColor = 'white'; // Highlight starting or current point
+        }
+        // If the cell is the starting point, highlight it in blue and add border
         if (row === currentRow && col === currentCol) {
-            cell.style.backgroundColor = 'blue'; // Highlight starting point
-            cell.style.color = 'white'; // Set text color to contrast
+            highlightCell(cell); // Call function to highlight the starting cell
         }
 
         // Add event listener for click interaction
         cell.addEventListener('click', function() {
-            if (isAdjacent(row, col)) {
-                if (cell.textContent !== '') {
-                    updateScore(parseInt(cell.textContent)); // Increase score by contents of the cell
-                    cell.style.backgroundColor = 'lightgray'; // Change color of clicked cell
-                    cell.textContent = ''; // Clear the cell value
-                    movePlayer(row, col); // Update player position
+            // Check if no moves are left
+            if (noMovesLeft()) {
+                endGame();
+            }
+            else if (cell.textContent === 'X') {
+                // alert('Cannot move to this cell, it is blocked!');
+                flashCell(cell, 'yellow', 5, 200); // Flash color if invalid click
+
+            } else if (isAdjacent(row, col)) {
+                const direction = getMoveDirection(row, col); // Determine the move direction
+                if (canMoveInDirection(direction)) { // Check if the player has moves left in that direction
+                    if (cell.textContent !== '') {
+                        updateScore(parseInt(cell.textContent)); // Increase score by contents of the cell
+                        cell.style.backgroundColor = 'white'; // Change color of clicked cell
+                        cell.textContent = ''; // Clear the cell value
+                        movePlayer(row, col, cell); // Update player position
+                        reduceMoveCount(direction); // Reduce the respective move count
+                        updateMovesLeft(); // Update moves display
+                    }
+                } else {
+                    // alert('No moves left in this direction!');
+                    flashCell(cell, 'red', 5, 200); // Flash color if no moves left
                 }
             } else {
                 flashCell(cell, 'yellow', 5, 200); // Flash color if invalid click
@@ -130,42 +161,99 @@ function drawGrid(gridSize) {
 
         gridContainer.appendChild(cell);
     }
+    console.log(grid)
 
-    highlightValidMoves(gridSize); // Highlight valid moves around the starting cell
+    place_obstacles(gridSize, grid);
+}
+
+function place_obstacles(gridSize, grid) {
+    let obstacle_count = Math.floor(gridSize * gridSize * OBSTACLE_COUNT_FACTOR)
+    console.log(obstacle_count)
+
+    for (let i = 0; i < obstacle_count; i++) {
+        let row = Math.floor(Math.random() * gridSize);
+        let col = Math.floor(Math.random() * gridSize);
+
+        grid[row][col] = -1;
+        console.log('Obstacle:', i, 'Position:', row, col, 'Value:', grid[row][col]);
+        // }
+    }
+
+    // Print the final grid with obstacles
+    console.log('Final Grid:', grid);
+
+    // Return the modified grid
+    return grid;
 }
 
 // Check if a clicked cell is adjacent to the current position
 function isAdjacent(row, col) {
     const rowDiff = Math.abs(currentRow - row);
     const colDiff = Math.abs(currentCol - col);
-    return (rowDiff === 1 && colDiff === 0) || // Vertical
-           (rowDiff === 0 && colDiff === 1) || // Horizontal
-           (rowDiff === 1 && colDiff === 1);   // Diagonal
+    return (rowDiff <= 1 && colDiff <= 1); // Check adjacency (includes diagonal)
 }
 
-// Move the player to the new position and update valid moves
-function movePlayer(newRow, newCol) {
+
+// Determine the move direction: 'horizontal', 'vertical', or 'diagonal'
+function getMoveDirection(newRow, newCol) {
+    const rowDiff = Math.abs(currentRow - newRow);
+    const colDiff = Math.abs(currentCol - newCol);
+    if (rowDiff === 1 && colDiff === 0) {
+        return 'vertical'; // Moved vertically
+    } else if (rowDiff === 0 && colDiff === 1) {
+        return 'horizontal'; // Moved horizontally
+    } else if (rowDiff === 1 && colDiff === 1) {
+        return 'diagonal'; // Moved diagonally
+    }
+    return null;
+}
+
+// Check if the player can move in the specified direction
+function canMoveInDirection(direction) {
+    if (direction === 'horizontal') {
+        return horzMovesLeft > 0;
+    } else if (direction === 'vertical') {
+        return vertMovesLeft > 0;
+    } else if (direction === 'diagonal') {
+        return diagMovesLeft > 0;
+    }
+    return false;
+}
+
+// Reduce the remaining moves based on the direction
+function reduceMoveCount(direction) {
+    if (direction === 'horizontal') {
+        horzMovesLeft--;
+    } else if (direction === 'vertical') {
+        vertMovesLeft--;
+    } else if (direction === 'diagonal') {
+        diagMovesLeft--;
+    }
+}
+
+// Move the player to the new position and highlight the current cell
+function movePlayer(newRow, newCol, newCell) {
+    if (previousCell) {
+        previousCell.style.border = '1px solid #ccc'; // Reset previous cell's border
+        previousCell.style.backgroundColor = 'lightgray'; // Highlight starting or current point
+
+    }
+
+    // Update player position
     currentRow = newRow;
     currentCol = newCol;
-    highlightValidMoves(document.getElementById('gridSizeInput').value); // Update valid move highlights
+
+    // Highlight the new cell with a border
+    highlightCell(newCell);
 }
 
-// Highlight the valid adjacent cells
-function highlightValidMoves(gridSize) {
-    const gridContainer = document.getElementById('gridContainer');
-    const cells = gridContainer.querySelectorAll('.grid-cell');
-    cells.forEach((cell, index) => {
-        const row = Math.floor(index / gridSize);
-        const col = index % gridSize;
-        
-        // if (isAdjacent(row, col) && cell.textContent !== '') {
-        //     cell.style.border = '2px solid green'; // Highlight valid cells
-        // } else {
-        //     cell.style.border = '1px solid #ccc'; // Reset border for non-adjacent cells
-        // }
-    });
+// Highlight a cell by adding a border
+function highlightCell(cell) {
+    cell.style.backgroundColor = 'green'; // Highlight starting or current point
+    cell.style.color = 'lightgray'; // Set text color to contrast
+    // cell.style.border = '3px solid red'; // Add a box around the current cell
+    previousCell = cell; // Store the current cell as the previous one for the next move
 }
-
 
 // Update moves left display
 function updateMovesLeft() {
@@ -173,6 +261,32 @@ function updateMovesLeft() {
     document.getElementById('vertMovesLeft').textContent = vertMovesLeft;
     document.getElementById('diagMovesLeft').textContent = diagMovesLeft;
 }
+
+function noMovesLeft() {
+    return horzMovesLeft <= 0 && vertMovesLeft <= 0 && diagMovesLeft <= 0;
+}
+
+// Show moves left container
+function showMoves() {
+    document.getElementById('movesContainer').style.display = 'block';
+}
+
+
+function endGame() {
+    alert('Game Over! No moves left.');
+    // Additional logic to end the game
+    // For example, hide the grid, show a restart button, etc.
+    document.getElementById('gridContainer').innerHTML = ''; // Clear the grid
+    hideControls(); // Optionally hide controls
+    showScore(); // Show final score or other information
+}
+
+
+// Hide moves left container
+function hideMoves() {
+    document.getElementById('movesContainer').style.display = 'none';
+}
+
 
 function flashCell(cell, color, count, delay) {
     const originalColor = cell.style.backgroundColor;
@@ -189,11 +303,11 @@ function flashCell(cell, color, count, delay) {
     }
 }
 
-
 function hideControls() {
     // Hide the controls (header, input, buttons)
     document.getElementById('controls').style.display = 'none';
     hideScore(); // Hide the score when selecting grid size
+    hideMoves(); // Hide moves container when selecting grid size
 }
 
 function showScore() {
