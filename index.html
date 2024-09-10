@@ -10,10 +10,21 @@
     <div class="container">
         <div id="controls">
             <h2>Select Grid Size (5 to 10):</h2>
-            <input type="number" id="gridSizeInput" min="5" max="10" value="8">
+            <label for="gridSizeInput">Grid Size:</label>
+            <input type="number" id="gridSizeInput" min="5" max="10" value="8" title="Enter grid size between 5 and 10" placeholder="Enter grid size">
             <br>
             <button id="startGame">Start Game</button>
             <button id="loadGame">Load Game</button>
+        </div>
+
+        <div id="scoreContainer">
+            <h3>Score: <span id="score">0</span></h3>
+        </div>
+
+        <div id="movesContainer">
+            <h3>Horz Moves Left: <span id="horzMovesLeft">10</span></h3>
+            <h3>Vert Moves Left: <span id="vertMovesLeft">10</span></h3>
+            <h3>Diag Moves Left: <span id="diagMovesLeft">2</span></h3>
         </div>
 
         <div id="gridContainer"></div> <!-- Grid will be displayed here -->

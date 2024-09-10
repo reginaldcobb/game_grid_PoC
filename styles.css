@@ -112,3 +112,19 @@ button:hover {
 .show {
     display: block;
 }
+
+/* Hide score container by default */
+#scoreContainer {
+    display: none; /* Hidden by default */
+    margin-bottom: 20px;
+}
+
+#scoreContainer h3 {
+    margin: 0;
+    font-size: 18px; /* Adjust as needed */
+    color: #333;
+}
+
+/* Other existing styles... */
+
+
