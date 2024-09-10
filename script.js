@@ -73,6 +73,7 @@ document.getElementById('hamburgerMenu').addEventListener('mouseleave', function
     }, 300);
 });
 
+
 //
 //////////////////////////////////////////////////////////////////////
 //
@@ -103,6 +104,7 @@ function drawGrid(gridSize) {
     console.log(grid)
 
     place_obstacles(gridSize, grid);
+    placePowerUps(gridSize, grid);
 
 
     // Select a random starting cell
@@ -129,14 +131,48 @@ function drawGrid(gridSize) {
             highlightCell(cell); // Call function to highlight the starting cell
         }
 
+        //
+        ////////////////////////////////////////////////////////////////////////////////////
+        //
         // Add event listener for click interaction
         cell.addEventListener('click', function() {
             // Check if no moves are left
             if (noMovesLeft()) {
                 endGame();
-            }
-            else if (cell.textContent === 'X') {
-                // alert('Cannot move to this cell, it is blocked!');
+            } else if (isPowerUp(cell)) {
+                console.log(`${cell.textContent} is a power-up!`);
+                if (cell.textContent === '+5H') {
+                    horzMovesLeft += 5;
+                    flashCell(cell, 'green', POWERUP_MOVE_FLASH_COUNT, 200); // Flash color if power-up
+                } else if (cell.textContent === '+5V') {
+                    vertMovesLeft += 5;
+                    flashCell(cell, 'green', POWERUP_MOVE_FLASH_COUNT, 200); // Flash color if power-up
+                } else if (cell.textContent === '+2H') {
+                    horzMovesLeft += 2;
+                    flashCell(cell, 'green', POWERUP_MOVE_FLASH_COUNT, 200); // Flash color if power-up
+                } else if (cell.textContent === '+2V') {
+                    vertMovesLeft += 2;
+                    flashCell(cell, 'green', POWERUP_MOVE_FLASH_COUNT, 200); // Flash color if power-up
+                } else if (cell.textContent === 'x2') {
+                    horzMovesLeft *= 2;
+                    vertMovesLeft *= 2;
+                    diagMovesLeft *= 2;
+                    flashCell(cell, 'green', POWERUP_MOVE_FLASH_COUNT, 200); // Flash color if power-up
+                } else if (cell.textContent === 'R') {
+                    horzMovesLeft = 0;
+                    vertMovesLeft = 0;
+                    diagMovesLeft = 0;
+                    flashCell(cell, 'green', POWERUP_MOVE_FLASH_COUNT, 200); // Flash color if power-up
+                } else if (cell.textContent === REMOVE_OBSTACLE_POWER_UP) {
+                    grid[row][col] = 0;
+                    flashCell(cell, 'green', POWERUP_MOVE_FLASH_COUNT, 200); // Flash color if power-up
+                } else if (cell.textContent === DIAGONAL_POWER_UP) {
+                    diagMovesLeft *= DIAGIONAL_MOVES_FACTOR;
+                    flashCell(cell, 'green', POWERUP_MOVE_FLASH_COUNT, 200); // Flash color if power-up
+                }
+                updateMovesLeft(); // Call the update function whenever movesLeft variables change
+
+            } else if (cell.textContent === 'X') {
                 flashCell(cell, 'yellow', 5, 200); // Flash color if invalid click
 
             } else if (isAdjacent(row, col)) {
@@ -151,7 +187,6 @@ function drawGrid(gridSize) {
                         updateMovesLeft(); // Update moves display
                     }
                 } else {
-                    // alert('No moves left in this direction!');
                     flashCell(cell, 'red', 5, 200); // Flash color if no moves left
                 }
             } else {
@@ -163,7 +198,12 @@ function drawGrid(gridSize) {
     }
     console.log(grid)
 
-    place_obstacles(gridSize, grid);
+    // place_obstacles(gridSize, grid);
+}
+
+// Function to check if a cell's textContent is a power-up
+function isPowerUp(cell) {
+    return POWER_UPS.includes(cell.textContent);
 }
 
 function place_obstacles(gridSize, grid) {
@@ -185,6 +225,56 @@ function place_obstacles(gridSize, grid) {
     // Return the modified grid
     return grid;
 }
+
+function placePowerUps(gridSize, grid) {
+    powerUpCount = Math.floor(gridSize * gridSize * POWER_UP_COUNT_FACTOR)
+    // Place at least one of each power-up
+    POWER_UPS.forEach(powerUp => {
+        let placed = false;
+        while (!placed) {
+            const i = Math.floor(Math.random() * gridSize);
+            const j = Math.floor(Math.random() * gridSize);
+            if (![-1, "+5H", "+5V", "+2H", "+2V", "x2", "R", DIAGONAL_POWER_UP].includes(grid[i][j])) {
+                grid[i][j] = powerUp;
+                placed = true;
+            }
+        }
+    });
+
+    // Place remaining power-ups randomly
+    let remainingPowerUps = POWER_UPS.flatMap(pu => Array(Math.floor(powerUpCount / POWER_UPS.length)).fill(pu));
+    remainingPowerUps = remainingPowerUps.slice(0, powerUpCount - POWER_UPS.length);
+
+    remainingPowerUps.forEach(() => {
+        let placed = false;
+        while (!placed) {
+            const i = Math.floor(Math.random() * gridSize);
+            const j = Math.floor(Math.random() * gridSize);
+            if (![-1, "+5H", "+5V", "+2H", "+2V", "x2", "R", DIAGONAL_POWER_UP].includes(grid[i][j])) {
+                const powerUp = remainingPowerUps[Math.floor(Math.random() * remainingPowerUps.length)];
+                grid[i][j] = powerUp;
+                remainingPowerUps = remainingPowerUps.filter(pu => pu !== powerUp);
+                placed = true;
+            }
+        }
+    });
+
+    // Calculate the remaining number of power-ups to place
+    const remainingPowerUpsCount = powerUpCount - POWER_UPS.length;
+
+    for (let k = 0; k < remainingPowerUpsCount; k++) {
+        while (true) {
+            const i = Math.floor(Math.random() * gridSize);
+            const j = Math.floor(Math.random() * gridSize);
+            if (grid[i][j] === 0 && !allPowerUpPositions.has(`${i},${j}`)) {
+                grid[i][j] = POWER_UPS[Math.floor(Math.random() * POWER_UPS.length)];
+                allPowerUpPositions.add(`${i},${j}`);
+                break;
+            }
+        }
+    }
+}
+
 
 // Check if a clicked cell is adjacent to the current position
 function isAdjacent(row, col) {
@@ -229,6 +319,7 @@ function reduceMoveCount(direction) {
     } else if (direction === 'diagonal') {
         diagMovesLeft--;
     }
+    updateMovesLeft(); // Call the update function whenever movesLeft variables change
 }
 
 // Move the player to the new position and highlight the current cell
@@ -251,7 +342,6 @@ function movePlayer(newRow, newCol, newCell) {
 function highlightCell(cell) {
     cell.style.backgroundColor = 'green'; // Highlight starting or current point
     cell.style.color = 'lightgray'; // Set text color to contrast
-    // cell.style.border = '3px solid red'; // Add a box around the current cell
     previousCell = cell; // Store the current cell as the previous one for the next move
 }
 
@@ -271,9 +361,8 @@ function showMoves() {
     document.getElementById('movesContainer').style.display = 'block';
 }
 
-
 function endGame() {
-    alert('Game Over! No moves left.');
+    // alert('Game Over! No moves left.');
     // Additional logic to end the game
     // For example, hide the grid, show a restart button, etc.
     document.getElementById('gridContainer').innerHTML = ''; // Clear the grid
@@ -340,10 +429,11 @@ function positionHamburgerMenu() {
     dropdownContainer.style.display = 'block'; // Ensure visibility
 }
 
-// Event listeners for dropdown menu options
 document.getElementById('endGame').addEventListener('click', function() {
-    alert('Game Ended!');
-});
+        endGame(); // Call the endGame function when "End Game" is clicked
+    });
+    
+    
 
 document.getElementById('saveGame').addEventListener('click', function() {
     alert('Game Saved!');
