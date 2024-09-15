@@ -6,9 +6,6 @@ const INITIAL_CELL_MAX = 11;
 const INITIAL_HORIZONTAL_MOVES = 10;
 const INITIAL_VERTICAL_MOVES = 10;
 const MIN_DIAGIONAL_MOVES = 2;
-// const INITIAL_HORIZONTAL_MOVES = 1;
-// const INITIAL_VERTICAL_MOVES = 1;
-// const MIN_DIAGIONAL_MOVES = 1;
 const DIAGIONAL_MOVES_FACTOR = 2;
 const OBSTACLE_COUNT_FACTOR = 0.1; // Proportional factor for obstacles (10% of grid cells)
 const POWER_UP_COUNT_FACTOR = 0.05; // Proportional factor for power-ups (5% of grid cells)
@@ -163,11 +160,6 @@ function drawGrid(gridSize) {
     //  
     cell.addEventListener("click", function () {
       const direction = getMoveDirection(row, col); // Determine the move direction
-      // console.log("reduceMoveCount --> cell.textContent=", cell.textContent, (cell.textContent !== 0), "isAdjacent=", isAdjacent(row, col) );
-      // reduceMoveCount(direction); // Reduce the respective move count
-      // reduceMoveCount(direction); // Reduce the respective move count
-      // updateMovesLeft(); // Update moves display
-
       // Check if no moves are left
       if (noMovesLeft()) {
         console.log("Game Over! No moves left. direction=", direction, "noMovesLeft: ", noMovesLeft(), "horzMovesLeft: ", horzMovesLeft, "vertMovesLeft: ", vertMovesLeft, "diagMovesLeft: ", diagMovesLeft);
@@ -190,13 +182,10 @@ function drawGrid(gridSize) {
           flashCell(cell, "purple", 4, 200); // Flash color if no moves left
         }
       } else if ((isAdjacent(row, col)) && (cell.style.backgroundColor !== "grey") ){
-        // const direction = getMoveDirection(row, col); // Determine the move direction
-        // console.log("previousrow=", prevRow,"previouscol=", prevCol, "row=", row, "col=", col, "clickRow=", clickRow, "clickCol=", clickCol);
         if (canMoveInDirection(direction)) {
           // Check if the player has moves left in that direction
           if (cell.textContent !== "") {
             updateScore(parseInt(cell.textContent)); // Increase score by contents of the cell
-            // cell.style.backgroundColor = "white"; // Change color of clicked cell
             cell.textContent = ""; // Clear the cell value
             movePlayer(row, col, cell); // Update player position
             reduceMoveCount(direction); // Reduce the respective move count
@@ -209,7 +198,6 @@ function drawGrid(gridSize) {
         }
       } else {
         if ((cell.style.backgroundColor !=="grey")) {
-          // console.log("cell.textContent=", cell.textContent, (cell.textContent !== 0), "isAdjacent=", isAdjacent(row, col) );
             flashCell(cell, "yellow", 5, 200); // Flash color if invalid click
         }
       }
@@ -217,9 +205,6 @@ function drawGrid(gridSize) {
 
     gridContainer.appendChild(cell);
   }
-  // console.log(grid);
-
-  // place_obstacles(gridSize, grid);
 }
 
 // Function to handle the power-up effect
@@ -274,19 +259,13 @@ function isAdjacent(row, col) {
 
 function place_obstacles(gridSize, grid) {
   let obstacle_count = Math.floor(gridSize * gridSize * OBSTACLE_COUNT_FACTOR);
-  // console.log(obstacle_count)
 
   for (let i = 0; i < obstacle_count; i++) {
     let row = Math.floor(Math.random() * gridSize);
     let col = Math.floor(Math.random() * gridSize);
 
     grid[row][col] = -1;
-    // console.log('Obstacle:', i, 'Position:', row, col, 'Value:', grid[row][col]);
-    // }
   }
-
-  // Print the final grid with obstacles
-  // console.log('Final Grid:', grid);
 
   // Return the modified grid
   return grid;
@@ -300,7 +279,6 @@ function placePowerUps(gridSize, grid) {
     while (!placed) {
       const i = Math.floor(Math.random() * gridSize);
       const j = Math.floor(Math.random() * gridSize);
-      // if (![-1, "+5H", "+5V", "+2H", "+2V", "x2", "R", DIAGONAL_POWER_UP].includes(grid[i][j])) {
       if (!POWER_UPS.includes(grid[i][j]) && grid[i][j] !== -1) {
         grid[i][j] = powerUp;
         placed = true;
@@ -411,12 +389,8 @@ function reduceMoveCount(direction) {
 function movePlayer(newRow, newCol, newCell) {
   if (previousCell) {
     previousCell.style.border = "1px solid #ccc"; // Reset previous cell's border
-    // previousCell.style.border = "1px solid red"; // Reset previous cell's border
-    // previousCell.style.backgroundColor = 'lightgray'; // Highlight starting or current point
     previousCell.style.backgroundColor = "grey"; // Highlight starting or current point
     previousCell.textContent = 0; // Clear the cell value
-    // set opacity to 0
-    // previousCell.style.visibility = "hidden";
   }
 
   // Update player position
@@ -478,7 +452,6 @@ function hasValidMoves(grid, clickRow, clickCol, previousCell) {
       newCol < grid[0].length
     ) {
       // Check if the cell is not an obstacle and not visited/greyed out
-      // if (grid[newRow][newCol] !== -1 && grid[newRow][newCol] !== "grey") {
       if (grid[newRow][newCol] !== -1 && grid[newRow][newCol] !== "") {
         console.log(
           `Valid move found at (${newRow}, ${newCol}, ${grid[newRow][newCol]})`
@@ -497,7 +470,6 @@ function showMoves() {
 }
 
 function endGame() {
-  // alert('Game Over! No moves left.');
   // Additional logic to end the game
   // For example, hide the grid, show a restart button, etc.
   document.getElementById("gridContainer").innerHTML = ""; // Clear the grid
@@ -520,7 +492,6 @@ function flashCell(cell, color, count, delay) {
     setTimeout(function () {
       cell.style.textContent = ''; // Revert to original text color
       cell.style.backgroundColor = originalColor; // Revert to original background color
-      // cell.style.backgroundColor = "grey"; // Revert to original color
     }, delay * (i + 1)); // Flash duration in milliseconds
     if (i < count - 1) {
       setTimeout(function () {
