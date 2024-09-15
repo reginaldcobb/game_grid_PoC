@@ -1,6 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
@@ -40,6 +41,12 @@ button:hover {
     background-color: #0056b3;
 }
 
+
+button:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
 /* Grid container */
 #gridContainer {
     margin-top: 20px;
@@ -48,13 +55,21 @@ button:hover {
 }
 
 .grid-cell {
-    width: 30px;
-    height: 30px;
+    width: 10vw; /* 10% of the viewport width */
+    height: 10vw; /* Maintain square cells */
+    max-width: 30px; /* Cap the size for larger screens */
+    max-height: 30px;
     background-color: #e0e0e0;
     display: flex;
     justify-content: center;
     align-items: center;
     border: 1px solid #ccc;
+}
+
+/* Disabled cell style (greyed-out) */
+.disabled-cell {
+    background-color: grey;
+    pointer-events: none; /* This makes the cell non-clickable */
 }
 
 /* Hamburger menu style */
@@ -83,11 +98,10 @@ button:hover {
     padding: 5px;
 }
 
-
 .dropdown-content {
     display: none;
     position: absolute;
-    top: 30px; /* Dropdown below the hamburger */
+    top: 30px;
     left: 0;
     background-color: #f9f9f9;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
@@ -95,6 +109,8 @@ button:hover {
     z-index: 1;
     min-width: 120px;
     padding: 5px 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .dropdown-content a {
@@ -111,12 +127,21 @@ button:hover {
 
 .show {
     display: block;
+    opacity: 1;
 }
 
 /* Hide score container by default */
 #scoreContainer {
-    display: none; /* Hidden by default */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-bottom: 20px;
+    transition: opacity 0.5s ease;
+}
+
+#scoreContainer.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 #scoreContainer h3 {

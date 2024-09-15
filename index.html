@@ -1,21 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+<meta name="description" content="A fun and interactive grid game where you can move across grid cells with specific move counters.">
+<meta name="keywords" content="grid game, puzzle game, interactive game, JavaScript game">
+<meta name="author" content="Your Name">
+<meta property="og:title" content="Grid Game">
+<meta property="og:description" content="Play this fun grid-based puzzle game.">
+<meta property="og:image" content="game-thumbnail.jpg"> <!-- Replace with an actual image -->
+<meta property="og:url" content="https://yourgame.com">
+<meta name="twitter:card" content="summary_large_image">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grid Game</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"> -->
 </head>
+
 <body>
     <div class="container">
         <div id="controls">
             <h2>Select Grid Size (5 to 10):</h2>
             <label for="gridSizeInput">Grid Size:</label>
-            <input type="number" id="gridSizeInput" min="5" max="10" value="8" title="Enter grid size between 5 and 10" placeholder="Enter grid size">
+            <input type="number" id="gridSizeInput" min="5" max="10" value="8" title="Enter grid size between 5 and 10" placeholder="Enter grid size" aria-label="Grid Size" required>
             <br>
-            <button id="startGame">Start Game</button>
-            <button id="loadGame">Load Game</button>
-        </div>
+            <button id="startGame" aria-label="Start the game">Start Game</button>
+            <button id="loadGame" aria-label="Load a previously saved game">Load Game</button>
+                    </div>
 
         <div id="scoreContainer">
             <h3>Score: <span id="score">0</span></h3>
@@ -27,13 +39,17 @@
             <p>Vertical: <span id="vertMovesLeft"></span></p>
             <p>Diagonal: <span id="diagMovesLeft"></span></p>
         </div>
+
+        <div id="loadingSpinner" style="display: none;">
+            <p>Loading...</p>
+        </div>
         
 
         <div id="gridContainer"></div> <!-- Grid will be displayed here -->
 
         <div id="dropdownContainer">
             <!-- Hamburger menu icon -->
-            <button id="hamburgerMenu" class="hamburger">&#9776;</button>
+            <button id="hamburgerMenu" class="hamburger" aria-label="Open the menu">&#9776;</button>
 
             <!-- Dropdown content -->
             <div id="dropdown" class="dropdown-content">
@@ -45,6 +61,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
