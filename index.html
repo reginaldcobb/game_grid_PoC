@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<meta name="description" content="A fun and interactive grid game where you can move across grid cells with specific move counters.">
+<meta name="description"
+    content="A fun and interactive grid game where you can move across grid cells with specific move counters.">
 <meta name="keywords" content="grid game, puzzle game, interactive game, JavaScript game">
 <meta name="author" content="Your Name">
 <meta property="og:title" content="Grid Game">
@@ -21,16 +22,22 @@
 <body>
     <div class="container">
         <div id="controls">
-            <h2>Select Grid Size (5 to 10):</h2>
+            <h2>Select Grid Size (5 to 10)</h2>
             <label for="gridSizeInput">Grid Size:</label>
-            <input type="number" id="gridSizeInput" min="5" max="10" value="8" title="Enter grid size between 5 and 10" placeholder="Enter grid size" aria-label="Grid Size" required>
+            <input type="number" id="gridSizeInput" min="5" max="10" value="8" title="Enter grid size between 5 and 10"
+                placeholder="Enter grid size" aria-label="Grid Size" required>
             <br>
             <button id="startGame" aria-label="Start the game">Start Game</button>
             <button id="loadGame" aria-label="Load a previously saved game">Load Game</button>
-                    </div>
+        </div>
 
-        <div id="scoreContainer">
+        <div id="scoreContainer"  style="display: none;">
             <h3>Score: <span id="score">0</span></h3>
+            <h4>Timer: <span id="score">0:00</span></h4>
+        </div>
+
+        <div id="endGameContainer"  style="display: none;">
+            <h3>Game Over!!</h3>
         </div>
 
         <div id="movesContainer" style="display: none;">
@@ -38,12 +45,13 @@
             <p>Horizontal: <span id="horzMovesLeft"></span></p>
             <p>Vertical: <span id="vertMovesLeft"></span></p>
             <p>Diagonal: <span id="diagMovesLeft"></span></p>
+            <p>Warps: <span id="warps"></span> TBD</p>
         </div>
 
         <div id="loadingSpinner" style="display: none;">
             <p>Loading...</p>
         </div>
-        
+
 
         <div id="gridContainer"></div> <!-- Grid will be displayed here -->
 
@@ -63,4 +71,5 @@
 
     <script src="script.js" defer></script>
 </body>
+
 </html>

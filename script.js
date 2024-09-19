@@ -10,17 +10,19 @@ const DIAGIONAL_MOVES_FACTOR = 2;
 const OBSTACLE_COUNT_FACTOR = 0.1; // Proportional factor for obstacles (10% of grid cells)
 const POWER_UP_COUNT_FACTOR = 0.05; // Proportional factor for power-ups (5% of grid cells)
 
-const REMOVE_OBSTACLE_POWER_UP = "↓R";
+const REMOVE_OBSTACLE_POWER_UP = "↓X";
 const DIAGONAL_POWER_UP = "D";
+const WARP_POWER_UP = "W";
 const POWER_UPS = [
-  "+5H",
-  "+5V",
-  "+2H",
-  "+2V",
-  "x2",
-  "R",
-  REMOVE_OBSTACLE_POWER_UP,
-  DIAGONAL_POWER_UP,
+  "+5H", // +5 horizontal moves
+  "+5V", // +5 vertical moves
+  "+2H", // +2 horizontal moves
+  "+2V", // +2 vertical moves
+  "x2", // Double all moves
+  "R", // Warp to a random open cell
+  WARP_POWER_UP, //Warps to a clicked cell
+  REMOVE_OBSTACLE_POWER_UP, // Gain power to walk thru obstacles
+  DIAGONAL_POWER_UP, // Increase diagonal moves by a factor
 ];
 
 const POWERUP_MOVE_FLASH_COUNT = 6;
@@ -54,6 +56,11 @@ document.getElementById("startGame").addEventListener("click", function () {
   } else {
     alert("Please select a grid size between 5 and 10.");
   }
+});
+
+document.getElementById("loadGame").addEventListener("click", function () {
+  alert("Loading Game function is not implemented yet.");
+
 });
 
 document.getElementById("hamburgerMenu").addEventListener("click", function () {
@@ -154,14 +161,24 @@ function drawGrid(gridSize) {
       highlightCell(cell); // Call function to highlight the starting cell
     }
 
+
     //
     ////////////////////////////////////////////////////////////////////////////////////
     // if user clicks on a cell, check if it is a valid move
     //  
+
     cell.addEventListener("click", function () {
+      // console.log("Cell is clicked");
+
       const direction = getMoveDirection(row, col); // Determine the move direction
+      /*if (direction === null) {
+        console.log("Clicked on current cell=", direction);
+        // if (noMovesLeft()) {
+        //   console.log("Game Over! No moves left. direction=", direction, "noMovesLeft: ", noMovesLeft(), "horzMovesLeft: ", horzMovesLeft, "vertMovesLeft: ", vertMovesLeft, "diagMovesLeft: ", diagMovesLeft);
+        //   endGame();
+        // }
       // Check if no moves are left
-      if (noMovesLeft()) {
+      } else */ if (noMovesLeft()) {
         console.log("Game Over! No moves left. direction=", direction, "noMovesLeft: ", noMovesLeft(), "horzMovesLeft: ", horzMovesLeft, "vertMovesLeft: ", vertMovesLeft, "diagMovesLeft: ", diagMovesLeft);
         updateScore(parseInt(cell.textContent)); // Increase score by contents of the cell
         endGame();
@@ -192,16 +209,38 @@ function drawGrid(gridSize) {
             updateMovesLeft(); // Update moves display
           }
         } else {
-          flashCell(cell, "red", 5, 200); // Flash color if no moves left
-          console.log("Game Over! No moves left. direction=", direction, "noMovesLeft: ", noMovesLeft(), "horzMovesLeft: ", horzMovesLeft, "vertMovesLeft: ", vertMovesLeft, "diagMovesLeft: ", diagMovesLeft);
-          endGame();
+          // flashCell(cell, "red", 5, 200); // Flash color if no moves left
+          console.log("No more moves left. direction=", direction, "noMovesLeft: ", noMovesLeft(), "horzMovesLeft: ", horzMovesLeft, "vertMovesLeft: ", vertMovesLeft, "diagMovesLeft: ", diagMovesLeft);
+          // endGame();
+          if (!hasValidMoves(grid, row, col, cell)) {
+            console.log("No Valid moves left. direction=", direction, "noMovesLeft: ", noMovesLeft(), "horzMovesLeft: ", horzMovesLeft, "vertMovesLeft: ", vertMovesLeft, "diagMovesLeft: ", diagMovesLeft);
+            endGame();
+          }
         }
+      } else if((direction === null)) {
+        console.log("Clicked on current cell=", direction);
       } else {
         if ((cell.style.backgroundColor !=="grey")) {
             flashCell(cell, "yellow", 5, 200); // Flash color if invalid click
         }
       }
     });
+
+
+    cell.addEventListener("mouseup", function () {
+      // console.log("No Moves left?", noMovesLeft());
+      console.log("Cell is mouseup");
+      if (!hasValidMoves(grid, row, col, cell)) {
+        console.log("In mouseup listner, no more moves... ending game.",  "noMovesLeft: ", noMovesLeft(), "horzMovesLeft: ", horzMovesLeft, "vertMovesLeft: ", vertMovesLeft, "diagMovesLeft: ", diagMovesLeft);
+        endGame();
+      }
+
+    });
+
+    // if (!hasValidMoves(grid, row, col, cell)) {
+    //   console.log("right before appendChild.");
+    //   endGame();
+    // }
 
     gridContainer.appendChild(cell);
   }
@@ -424,7 +463,7 @@ function noMovesLeft() {
   return horzMovesLeft <= 0 && vertMovesLeft <= 0 && diagMovesLeft <= 0;
 }
 
-function hasValidMoves(grid, clickRow, clickCol, previousCell) {
+function hasValidMoves(grid, clickRow, clickCol, cell) {
   const directions = [
     { row: -1, col: 0 }, // Up
     { row: 1, col: 0 }, // Down
@@ -452,8 +491,12 @@ function hasValidMoves(grid, clickRow, clickCol, previousCell) {
       newCol < grid[0].length
     ) {
       // Check if the cell is not an obstacle and not visited/greyed out
-      if (grid[newRow][newCol] !== -1 && grid[newRow][newCol] !== "") {
-        console.log(
+      console.log(
+        `Checking hasValidMoves (${newRow}, ${newCol}, ${cell.style.backgroundColor})`
+      );
+      // if ( (grid[newRow][newCol] !== -1) && (grid[newRow][newCol] !== "") && (cell.style.backgroundColor !== "green") ) {
+      if ( (grid[newRow][newCol] !== -1) && (grid[newRow][newCol] !== "") && (cell.style.backgroundColor !== "green") ) {
+          console.log(
           `Valid move found at (${newRow}, ${newCol}, ${grid[newRow][newCol]})`
         );
         return true; // Valid move found
@@ -475,6 +518,7 @@ function endGame() {
   document.getElementById("gridContainer").innerHTML = ""; // Clear the grid
   hideControls(); // Optionally hide controls
   showScore(); // Show final score or other information
+  showEndGame(); // Show final score or other information
 }
 
 // Hide moves left container
@@ -508,10 +552,19 @@ function hideControls() {
   document.getElementById("controls").style.display = "none";
   hideScore(); // Hide the score when selecting grid size
   hideMoves(); // Hide moves container when selecting grid size
+  hideEndGame(); // Hide the end game container
 }
 
 function showScore() {
   document.getElementById("scoreContainer").style.display = "block";
+}
+
+function showEndGame() {
+  document.getElementById("endGameContainer").style.display = "block";
+}
+
+function hideEndGame() {
+  document.getElementById("endGameContainer").style.display = "none";
 }
 
 function hideScore() {
@@ -529,13 +582,14 @@ function resetScore() {
 }
 
 function positionHamburgerMenu() {
-  const gridContainer = document.getElementById("gridContainer");
+  // const gridContainer = document.getElementById("gridContainer");
+  const gridContainer = document.getElementById("scoreContainer");
   const gridRect = gridContainer.getBoundingClientRect();
   const dropdownContainer = document.getElementById("dropdownContainer");
 
   // Position the hamburger menu above the top-left grid cell with adjusted space
   dropdownContainer.style.position = "absolute"; // Ensure absolute positioning
-  dropdownContainer.style.top = `${gridRect.top - 50}px`; // Adjust to move up
+  dropdownContainer.style.top = `${gridRect.top - 25}px`; // Adjust to move up
   dropdownContainer.style.left = `${gridRect.left}px`; // Adjust as needed
   dropdownContainer.style.display = "block"; // Ensure visibility
 }
