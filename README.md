@@ -1,11 +1,101 @@
 # 🎮 Game Grid PoC  
-A technical proof‑of‑concept exploring grid‑based movement, state management, and terminal‑rendered game loops in Python. This project demonstrates how to model a 2D world, update entities, and visualize changes frame‑by‑frame — forming the foundation for turn‑based or real‑time grid games.
+A browser‑based proof‑of‑concept demonstrating grid‑based movement, DOM‑driven rendering, and simple game‑loop mechanics using **HTML, CSS, and vanilla JavaScript**. The game runs entirely in your browser — no backend, no build tools, no dependencies.
+
+**See the README to PLAY THE GAME!!**
+
+---
+
+## 🌐 Overview
+
+Game Grid PoC is a lightweight experiment in interactive grid logic. It renders a 2D grid in the browser and allows the player to move around using keyboard controls. The project explores:
+
+- DOM‑based grid rendering  
+- Player state management  
+- Keyboard event handling  
+- Real‑time visual updates  
+- Clean separation of logic (HTML / CSS / JS)
+
+This PoC is intentionally simple but structured so you can extend it into a full game engine.
+
+---
+
+## 📂 Project Structure
+
+```
+game_grid_PoC/
+├── index.html        # Main game UI and grid container
+├── script.js         # Game logic, movement, rendering
+├── styles.css        # Grid styling and layout
+├── favicon.ico
+├── favicon-32x32.png
+└── README.md
+```
+
+---
+
+## ▶️ How to Play the Game
+
+### **Option 1 — Just open it**
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/reginaldcobb/game_grid_PoC.git
+   cd game_grid_PoC
+   ```
+
+2. Open `index.html` in your browser:
+   - macOS:
+     ```bash
+     open index.html
+     ```
+   - Windows:
+     ```bash
+     start index.html
+     ```
+   - Or double‑click it in your file explorer.
+
+You're in the game immediately.
+
+---
+
+### **Option 2 — Run with a local web server (recommended)**
+
+Some browsers restrict JS when loading from `file://`.
+
+#### Python 3:
+```bash
+python -m http.server 8000
+```
+Open:
+```
+http://localhost:8000
+```
+
+#### Node:
+```bash
+npx http-server .
+```
+
+---
+
+## 🎮 Controls
+
+```
+W = Move Up
+A = Move Left
+S = Move Down
+D = Move Right
+```
+
+The grid updates instantly as you move.
 
 ---
 
 ## 📐 Grid System Architecture
 
-The game world is represented as a **2D matrix**, implemented as a list of lists:
+The grid is rendered using DOM elements (typically `<div>`s styled with CSS Grid).  
+Each cell is represented visually and updated dynamically.
+
+### **Grid Diagram**
 
 ```
 +---+---+---+---+---+
@@ -23,100 +113,47 @@ The game world is represented as a **2D matrix**, implemented as a list of lists
 
 ### **Legend**
 - `P` → Player  
-- `.` → Empty cell  
-- Additional entities can be added (walls, enemies, items)
+- `.` → Empty tile  
 
-### **Internal Representation**
-```python
-grid = [
-    [".", ".", ".", ".", "."],
-    [".", "P", ".", ".", "."],
-    [".", ".", ".", ".", "."],
-    [".", ".", ".", ".", "."],
-    [".", ".", ".", ".", "."],
-]
+### **Internal Representation (Conceptual)**
+
+```javascript
+const grid = [
+  ["." , ".", ".", ".", "."],
+  ["." , "P", ".", ".", "."],
+  ["." , ".", ".", ".", "."],
+  ["." , ".", ".", ".", "."],
+  ["." , ".", ".", ".", "."],
+];
 ```
 
 ### **Coordinate System**
-- `(row, col)`  
-- `(0, 0)` is top‑left  
-- Movement updates coordinates and triggers a redraw
+- `(row, col)`
+- `(0, 0)` is top‑left
+- Movement updates the player’s coordinates, then re-renders the grid
 
 ---
 
 ## 🧠 Game Rules & Logic
 
-### **1. Movement Rules**
-- Player can move: **up, down, left, right**
-- Movement is blocked by grid boundaries
-- Invalid moves do nothing (but still redraw)
-
-### **2. Turn Loop**
-Each turn:
-
-1. Render grid  
-2. Accept input  
-3. Validate move  
-4. Update player position  
-5. Redraw grid  
-
-### **3. Rendering Rules**
-- Grid is cleared and redrawn every frame  
+### **Movement Rules**
+- Player moves with WASD  
+- Movement is blocked at grid edges  
 - Only one player exists  
-- Player position is always unique and tracked in memory
+- Each move triggers a full or partial DOM update  
 
-### **4. Extensibility Rules**
-The PoC is intentionally simple but structured to support:
+### **Rendering Rules**
+- The grid is drawn using CSS Grid  
+- The player tile is styled differently (e.g., `.player` class)  
+- Movement updates the DOM by:
+  - Removing the player class from the old tile  
+  - Adding it to the new tile  
 
-- Obstacles  
-- Enemies  
-- Pathfinding  
-- Fog‑of‑war  
-- Multi‑entity updates  
-- Real‑time tick loops  
+### **Event Handling**
+Keyboard events are captured via:
 
----
-
-## 🛠 Project Structure
-
-```
-game_grid_PoC/
-├── main.py          # Entry point and game loop
-├── grid.py          # Grid creation, rendering, and utilities
-├── player.py        # Player state and movement logic
-└── README.md        # Documentation
-```
-
----
-
-## ▶️ Running the Program
-
-### **1. Clone the repository**
-```bash
-git clone https://github.com/reginaldcobb/game_grid_PoC.git
-cd game_grid_PoC
-```
-
-### **2. Run the game**
-```bash
-python main.py
-```
-
-If your entry file is named differently (e.g., `game.py`), run:
-
-```bash
-python game.py
-```
-
-### **3. Controls**
-Inside the game loop, you’ll be prompted for movement:
-
-```
-w = up
-s = down
-a = left
-d = right
-q = quit
+```javascript
+document.addEventListener("keydown", handleMove);
 ```
 
 ---
@@ -124,45 +161,41 @@ q = quit
 ## 🧩 Technical Deep Dive
 
 ### **Grid Rendering**
-The grid is redrawn each frame using:
+The grid is created dynamically:
 
-```python
-for row in grid:
-    print(" ".join(row))
+```javascript
+function drawGrid() {
+  gridElement.innerHTML = "";
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      if (r === playerRow && c === playerCol) {
+        cell.classList.add("player");
+      }
+      gridElement.appendChild(cell);
+    }
+  }
+}
 ```
 
 ### **Movement Engine**
-Movement is handled by updating the player’s `(row, col)`:
+```javascript
+function movePlayer(dx, dy) {
+  const newRow = playerRow + dy;
+  const newCol = playerCol + dx;
 
-```python
-if direction == "up" and row > 0:
-    row -= 1
-```
-
-### **State Reset**
-Before placing the player, the grid is cleared:
-
-```python
-grid = [["." for _ in range(width)] for _ in range(height)]
-grid[player_row][player_col] = "P"
+  if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+    playerRow = newRow;
+    playerCol = newCol;
+    drawGrid();
+  }
+}
 ```
 
 ### **Game Loop**
-A simple blocking loop:
-
-```python
-while True:
-    draw_grid()
-    direction = input("Move: ")
-    update_player(direction)
-```
-
-This can be upgraded to:
-
-- non‑blocking input  
-- timed ticks  
-- event queues  
-- multi‑entity updates  
+This PoC uses event‑driven updates rather than a timed loop.  
+The grid updates only when the player moves.
 
 ---
 
@@ -172,30 +205,31 @@ This can be upgraded to:
 - Grid rendering  
 - Player movement  
 - Boundary checks  
-- Turn loop  
+- DOM updates  
 
 ### **Phase 2 — World Building**
 - Add walls / obstacles  
 - Add collectible items  
-- Add enemies with simple AI  
-- Add map loading from JSON  
+- Add goal tiles  
+- Add level layouts from JSON  
 
 ### **Phase 3 — Game Mechanics**
-- Health system  
-- Inventory  
-- Combat  
-- Scoring  
+- Score system  
+- Timer or turn counter  
+- Multiple levels  
+- Reset / restart button  
 
-### **Phase 4 — Visualization**
-- Colorized terminal output  
-- Sprite‑based rendering  
-- Web‑based UI (React or Pygame alternative)  
+### **Phase 4 — Visual Enhancements**
+- Animations  
+- Color themes  
+- Mobile‑friendly controls  
+- Sound effects  
 
-### **Phase 5 — Advanced Systems**
+### **Phase 5 — Advanced Features**
+- Enemy AI  
 - Pathfinding (A*)  
 - Procedural map generation  
-- Save/load system  
-- Multi‑level dungeons  
+- Save/load state  
 
 ---
 
@@ -203,7 +237,7 @@ This can be upgraded to:
 
 1. Fork the repo  
 2. Create a feature branch  
-3. Add tests where appropriate  
+3. Make your changes  
 4. Submit a pull request  
 
 ---
