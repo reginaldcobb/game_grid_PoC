@@ -1,21 +1,181 @@
-# 🎮 Game Grid PoC  
-A browser‑based proof‑of‑concept demonstrating grid‑based movement, DOM‑driven rendering, and simple game‑loop mechanics using **HTML, CSS, and vanilla JavaScript**. The game runs entirely in your browser — no backend, no build tools, no dependencies.
+# 🎮 Grid Game — Browser‑Based Strategy Puzzle
 
-**See the README to PLAY THE GAME!!**
+A fast, addictive grid‑based strategy game where every move counts.  
+You start on a random cell inside a grid filled with numbers, obstacles, and power‑ups.  
+Your goal: **collect as many points as possible before your movement counters run out.**
+
+The game runs entirely in your browser — no backend, no build tools, no dependencies.
 
 ---
 
-## 🌐 Overview
+## 🚀 How to Play
 
-Game Grid PoC is a lightweight experiment in interactive grid logic. It renders a 2D grid in the browser and allows the player to move around using keyboard controls. The project explores:
+### 1. Start the Game
+1. Open `index.html` in any modern browser  
+2. Choose a grid size between **5 and 10**  
+3. Click **Start Game**
 
-- DOM‑based grid rendering  
-- Player state management  
-- Keyboard event handling  
-- Real‑time visual updates  
-- Clean separation of logic (HTML / CSS / JS)
+A grid appears containing:
+- Random positive and negative numbers  
+- Obstacles (`X`)  
+- Power‑ups  
+- A randomly chosen **starting cell**, highlighted in green  
 
-This PoC is intentionally simple but structured so you can extend it into a full game engine.
+---
+
+## 🎯 Objective
+
+Move from cell to cell with your mouse, collecting points from each visited tile.  
+Your score increases by the **numeric value** of the cell you step on.
+
+The game ends when:
+- All movement counters reach zero  
+- OR no valid moves remain  
+- OR you click **End Game**  
+
+---
+
+## 🎮 Movement Rules
+
+You can move to **any adjacent cell**, including diagonals:
+
+```
+[↖] [↑] [↗]
+[←] [P] [→]
+[↙] [↓] [↘]
+```
+
+Movement types:
+
+| Move Type | Description | Counter |
+|----------|-------------|---------|
+| **Horizontal** | Left or Right | `horzMovesLeft` |
+| **Vertical** | Up or Down | `vertMovesLeft` |
+| **Diagonal** | Any diagonal direction | `diagMovesLeft` |
+
+You must have moves left in that direction to move.
+
+Invalid moves:
+- Clicking a non‑adjacent cell  
+- Clicking an obstacle (`X`)  
+- Clicking a valid cell but having **0 moves** in that direction  
+
+---
+
+## 🧮 Scoring System
+
+When you move onto a cell:
+
+- The **number** in the cell is added to your score  
+- The cell becomes **visited** (grey background, value becomes `0`)  
+- The score display updates immediately  
+
+Examples:
+- Step on `7` → score +7  
+- Step on `-3` → score −3  
+
+---
+
+## ⚡ Power‑Ups
+
+Power‑ups appear randomly and give special abilities.
+
+| Power‑Up | Effect |
+|----------|--------|
+| `+5H` | +5 horizontal moves |
+| `+5V` | +5 vertical moves |
+| `+2H` | +2 horizontal moves |
+| `+2V` | +2 vertical moves |
+| `x2` | Doubles **all** move counters |
+| `R` | Reserved for future random‑warp behavior |
+| `W` | Warp to a clicked cell (future feature) |
+| `↓X` | Remove an obstacle (turns `X` into `0`) |
+| `D` | Multiply diagonal moves by a factor |
+
+Rules:
+- Power‑ups must be **adjacent** to activate  
+- Clicking one applies its effect, clears the cell, and moves you into it  
+
+---
+
+## 🧱 Obstacles
+
+Obstacles are represented as:
+
+```
+X
+```
+
+Rules:
+- You **cannot** move onto an obstacle  
+- Unless you have the **Remove Obstacle** power‑up (`↓X`)  
+- Obstacles are placed randomly based on grid size  
+
+---
+
+## 🧩 Grid Generation
+
+When the game starts:
+
+1. A grid of size **5–10** is created  
+2. Each cell is assigned a random number between **-5 and 10**, excluding `-1` and `0`  
+3. Obstacles are placed using:  
+   ```
+   OBSTACLE_COUNT_FACTOR = 0.1  // 10% of grid cells
+   ```
+4. Power‑ups are placed using:  
+   ```
+   POWER_UP_COUNT_FACTOR = 0.05 // 5% of grid cells
+   ```
+5. A random starting cell is chosen and set to `0`  
+6. The starting cell is highlighted in green  
+
+---
+
+## 🧠 Game End Conditions
+
+The game ends when:
+
+- All movement counters reach zero  
+- OR no adjacent valid moves exist  
+- OR the player clicks **End Game**  
+- OR the grid is fully exhausted  
+
+When the game ends:
+- The grid disappears  
+- “Game Over” is displayed  
+- The final score remains visible  
+
+---
+
+## 🧭 Technical Breakdown
+
+### Movement Detection
+```javascript
+getMoveDirection(newRow, newCol)
+```
+Returns:
+- `"horizontal"`
+- `"vertical"`
+- `"diagonal"`
+- `null` (invalid)
+
+### Move Counter Enforcement
+```javascript
+canMoveInDirection(direction)
+```
+
+### Score Updates
+```javascript
+updateScore(points)
+```
+
+### Valid Move Checking
+```javascript
+hasValidMoves(grid, clickRow, clickCol, cell)
+```
+
+If false → game ends.
 
 ---
 
@@ -23,9 +183,9 @@ This PoC is intentionally simple but structured so you can extend it into a full
 
 ```
 game_grid_PoC/
-├── index.html        # Main game UI and grid container
-├── script.js         # Game logic, movement, rendering
-├── styles.css        # Grid styling and layout
+├── index.html        # Main UI and game container
+├── script.js         # Game logic, movement, scoring, power-ups
+├── styles.css        # Grid layout and visual styling
 ├── favicon.ico
 ├── favicon-32x32.png
 └── README.md
@@ -33,203 +193,56 @@ game_grid_PoC/
 
 ---
 
-## ▶️ How to Play the Game
+## ▶️ How to Run
 
-### **Option 1 — Just open it**
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/reginaldcobb/game_grid_PoC.git
-   cd game_grid_PoC
-   ```
+### Option 1 — Open directly
+Just open:
 
-2. Open `index.html` in your browser:
-   - macOS:
-     ```bash
-     open index.html
-     ```
-   - Windows:
-     ```bash
-     start index.html
-     ```
-   - Or double‑click it in your file explorer.
+```
+index.html
+```
 
-You're in the game immediately.
+### Option 2 — Run a local server (recommended)
 
----
-
-### **Option 2 — Run with a local web server (recommended)**
-
-Some browsers restrict JS when loading from `file://`.
-
-#### Python 3:
+**Python:**
 ```bash
 python -m http.server 8000
 ```
-Open:
+Visit:
 ```
 http://localhost:8000
 ```
 
-#### Node:
+**Node:**
 ```bash
 npx http-server .
 ```
 
 ---
 
-## 🎮 Controls
-
-```
-W = Move Up
-A = Move Left
-S = Move Down
-D = Move Right
-```
-
-The grid updates instantly as you move.
-
----
-
-## 📐 Grid System Architecture
-
-The grid is rendered using DOM elements (typically `<div>`s styled with CSS Grid).  
-Each cell is represented visually and updated dynamically.
-
-### **Grid Diagram**
-
-```
-+---+---+---+---+---+
-| . | . | . | . | . |
-+---+---+---+---+---+
-| . | P | . | . | . |
-+---+---+---+---+---+
-| . | . | . | . | . |
-+---+---+---+---+---+
-| . | . | . | . | . |
-+---+---+---+---+---+
-| . | . | . | . | . |
-+---+---+---+---+---+
-```
-
-### **Legend**
-- `P` → Player  
-- `.` → Empty tile  
-
-### **Internal Representation (Conceptual)**
-
-```javascript
-const grid = [
-  ["." , ".", ".", ".", "."],
-  ["." , "P", ".", ".", "."],
-  ["." , ".", ".", ".", "."],
-  ["." , ".", ".", ".", "."],
-  ["." , ".", ".", ".", "."],
-];
-```
-
-### **Coordinate System**
-- `(row, col)`
-- `(0, 0)` is top‑left
-- Movement updates the player’s coordinates, then re-renders the grid
-
----
-
-## 🧠 Game Rules & Logic
-
-### **Movement Rules**
-- Player moves with WASD  
-- Movement is blocked at grid edges  
-- Only one player exists  
-- Each move triggers a full or partial DOM update  
-
-### **Rendering Rules**
-- The grid is drawn using CSS Grid  
-- The player tile is styled differently (e.g., `.player` class)  
-- Movement updates the DOM by:
-  - Removing the player class from the old tile  
-  - Adding it to the new tile  
-
-### **Event Handling**
-Keyboard events are captured via:
-
-```javascript
-document.addEventListener("keydown", handleMove);
-```
-
----
-
-## 🧩 Technical Deep Dive
-
-### **Grid Rendering**
-The grid is created dynamically:
-
-```javascript
-function drawGrid() {
-  gridElement.innerHTML = "";
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
-      if (r === playerRow && c === playerCol) {
-        cell.classList.add("player");
-      }
-      gridElement.appendChild(cell);
-    }
-  }
-}
-```
-
-### **Movement Engine**
-```javascript
-function movePlayer(dx, dy) {
-  const newRow = playerRow + dy;
-  const newCol = playerCol + dx;
-
-  if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
-    playerRow = newRow;
-    playerCol = newCol;
-    drawGrid();
-  }
-}
-```
-
-### **Game Loop**
-This PoC uses event‑driven updates rather than a timed loop.  
-The grid updates only when the player moves.
-
----
-
 ## 🧭 Development Roadmap
 
-### **Phase 1 — Core Engine (Complete)**
-- Grid rendering  
-- Player movement  
-- Boundary checks  
-- DOM updates  
+### Phase 1 — Core Mechanics (Complete)
+- Grid generation  
+- Movement logic  
+- Scoring  
+- Obstacles  
+- Power‑ups  
+- End‑game detection  
 
-### **Phase 2 — World Building**
-- Add walls / obstacles  
-- Add collectible items  
-- Add goal tiles  
-- Add level layouts from JSON  
-
-### **Phase 3 — Game Mechanics**
-- Score system  
-- Timer or turn counter  
-- Multiple levels  
-- Reset / restart button  
-
-### **Phase 4 — Visual Enhancements**
-- Animations  
-- Color themes  
-- Mobile‑friendly controls  
+### Phase 2 — Enhancements
+- Timer (UI placeholder exists)  
+- Warp power‑up full implementation  
+- Save/load game state  
+- Animations for movement  
 - Sound effects  
 
-### **Phase 5 — Advanced Features**
-- Enemy AI  
-- Pathfinding (A*)  
-- Procedural map generation  
-- Save/load state  
+### Phase 3 — Advanced Features
+- Multiple levels  
+- Difficulty modes  
+- High‑score tracking  
+- Mobile‑friendly controls  
+- Visual themes  
 
 ---
 
